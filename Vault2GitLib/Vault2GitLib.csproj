@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Vault2Git.Lib</RootNamespace>
     <AssemblyName>Vault2GitLib</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
@@ -31,6 +31,9 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkProfile />
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -41,6 +44,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -50,13 +54,47 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DragnetLib, Version=4.0.6.15954, Culture=neutral, PublicKeyToken=14a8075ce88af4e0, processorArchitecture=MSIL" />
-    <Reference Include="SGDiff, Version=4.0.6.15954, Culture=neutral, PublicKeyToken=f3bc199665d82028, processorArchitecture=MSIL" />
+    <Reference Include="DragnetLib, Version=4.1.4.18402, Culture=neutral, PublicKeyToken=14a8075ce88af4e0, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>libs\VaultClientAPI_4_1_4_18402\DragnetLib.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Threading.Tasks, Version=1.0.12.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Bcl.Async.1.0.168\lib\net40\Microsoft.Threading.Tasks.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Threading.Tasks.Extensions, Version=1.0.12.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Bcl.Async.1.0.168\lib\net40\Microsoft.Threading.Tasks.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Threading.Tasks.Extensions.Desktop, Version=1.0.168.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Bcl.Async.1.0.168\lib\net40\Microsoft.Threading.Tasks.Extensions.Desktop.dll</HintPath>
+    </Reference>
+    <Reference Include="Nito.AsyncEx, Version=3.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Nito.AsyncEx.3.0.1\lib\net40\Nito.AsyncEx.dll</HintPath>
+    </Reference>
+    <Reference Include="Nito.AsyncEx.Concurrent, Version=3.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Nito.AsyncEx.3.0.1\lib\net40\Nito.AsyncEx.Concurrent.dll</HintPath>
+    </Reference>
+    <Reference Include="Nito.AsyncEx.Enlightenment, Version=3.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Nito.AsyncEx.3.0.1\lib\net40\Nito.AsyncEx.Enlightenment.dll</HintPath>
+    </Reference>
+    <Reference Include="Polly.Net40Async, Version=5.9.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Polly.Net40Async.5.9.0\lib\net40\Polly.Net40Async.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.IO, Version=2.6.10.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Bcl.1.1.10\lib\net40\System.IO.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net" />
+    <Reference Include="System.Runtime, Version=2.6.10.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Bcl.1.1.10\lib\net40\System.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Threading.Tasks, Version=2.6.10.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Bcl.1.1.10\lib\net40\System.Threading.Tasks.dll</HintPath>
     </Reference>
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -66,24 +104,48 @@
     </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="VaultClientIntegrationLib, Version=4.0.6.15954, Culture=neutral, PublicKeyToken=500623c275bd78a9, processorArchitecture=MSIL" />
-    <Reference Include="VaultClientNetLib, Version=4.0.6.15954, Culture=neutral, PublicKeyToken=e372e94840f8a4d3, processorArchitecture=MSIL" />
-    <Reference Include="VaultClientOperationsLib, Version=4.0.6.15954, Culture=neutral, PublicKeyToken=e372e94840f8a4d3, processorArchitecture=MSIL" />
-    <Reference Include="VaultLib, Version=4.0.6.15954, Culture=neutral, PublicKeyToken=a74d7badb9387c36, processorArchitecture=MSIL" />
-    <Reference Include="VCDiff, Version=4.0.6.15954, Culture=neutral, PublicKeyToken=4f75799f06837886, processorArchitecture=MSIL" />
+    <Reference Include="VaultClientIntegrationLib, Version=4.1.4.18402, Culture=neutral, PublicKeyToken=500623c275bd78a9, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>libs\VaultClientAPI_4_1_4_18402\VaultClientIntegrationLib.dll</HintPath>
+    </Reference>
+    <Reference Include="VaultClientNetLib, Version=4.1.4.18402, Culture=neutral, PublicKeyToken=e372e94840f8a4d3, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>libs\VaultClientAPI_4_1_4_18402\VaultClientNetLib.dll</HintPath>
+    </Reference>
+    <Reference Include="VaultClientOperationsLib, Version=4.1.4.18402, Culture=neutral, PublicKeyToken=e372e94840f8a4d3, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>libs\VaultClientAPI_4_1_4_18402\VaultClientOperationsLib.dll</HintPath>
+    </Reference>
+    <Reference Include="VaultLib, Version=4.1.4.18402, Culture=neutral, PublicKeyToken=a74d7badb9387c36, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>libs\VaultClientAPI_4_1_4_18402\VaultLib.dll</HintPath>
+    </Reference>
+    <Reference Include="VaultPluginLib, Version=4.1.4.18402, Culture=neutral, PublicKeyToken=fc84ae6bc3a25ec3, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>libs\VaultClientAPI_4_1_4_18402\VaultPluginLib.dll</HintPath>
+    </Reference>
+    <Reference Include="VaultServiceBase, Version=4.1.4.18402, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>libs\VaultClientAPI_4_1_4_18402\VaultServiceBase.dll</HintPath>
+    </Reference>
+    <Reference Include="VCDiff, Version=4.1.4.18402, Culture=neutral, PublicKeyToken=4f75799f06837886, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>libs\VaultClientAPI_4_1_4_18402\VCDiff.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Processor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="libs\VaultClientAPI_4_0_6_15954\DragnetLib.dll" />
-    <Content Include="libs\VaultClientAPI_4_0_6_15954\SGDiff.dll" />
-    <Content Include="libs\VaultClientAPI_4_0_6_15954\VaultClientIntegrationLib.dll" />
-    <Content Include="libs\VaultClientAPI_4_0_6_15954\VaultClientNetLib.dll" />
-    <Content Include="libs\VaultClientAPI_4_0_6_15954\VaultClientOperationsLib.dll" />
-    <Content Include="libs\VaultClientAPI_4_0_6_15954\VaultLib.dll" />
-    <Content Include="libs\VaultClientAPI_4_0_6_15954\VCDiff.dll" />
+    <Content Include="libs\VaultClientAPI_4_1_4_18402\DragnetLib.dll" />
+    <Content Include="libs\VaultClientAPI_4_1_4_18402\VaultClientIntegrationLib.dll" />
+    <Content Include="libs\VaultClientAPI_4_1_4_18402\VaultClientNetLib.dll" />
+    <Content Include="libs\VaultClientAPI_4_1_4_18402\VaultClientOperationsLib.dll" />
+    <Content Include="libs\VaultClientAPI_4_1_4_18402\VaultLib.dll" />
+    <Content Include="libs\VaultClientAPI_4_1_4_18402\VaultPluginLib.dll" />
+    <Content Include="libs\VaultClientAPI_4_1_4_18402\VaultServiceBase.dll" />
+    <Content Include="libs\VaultClientAPI_4_1_4_18402\VCDiff.dll" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
@@ -102,7 +164,18 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets" Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets'))" />
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

@@ -11,6 +11,7 @@ using VaultClientOperationsLib;
 using VaultLib;
 using System.Xml.XPath;
 using System.Xml;
+using Polly;
 
 namespace Vault2Git.Lib
 {
@@ -48,7 +49,9 @@ namespace Vault2Git.Lib
         private const string _gitAddCmd = "add --all .";
         private const string _gitStatusCmd = "status --porcelain";
         private const string _gitLastCommitInfoCmd = "log -1 {0}";
+        private const string _gitLastCommitMessageCmd = "log -1 {0}  --pretty=%B";
         private const string _gitCommitCmd = @"commit --allow-empty --all --date=""{2}"" --author=""{0} <{0}@{1}>"" -F -";
+        private const string _gitCommitAmendCmd = @"commit --amend --allow-empty --all -F -";
         private const string _gitCheckoutCmd = "checkout --quiet --force {0}";
         private const string _gitBranchCmd = "branch";
         private const string _gitAddTagCmd = @"tag {0} {1} -a -m ""{2}""";
@@ -167,8 +170,9 @@ namespace Vault2Git.Lib
                         //get vault version info
                         var info = vaultVersions[version.Key];
                         //commit
-                        ticks += gitCommit(info.Login, info.TrxId, this.GitDomainName,
-                                           buildCommitMessage(vaultRepoPath, version.Key, info), info.TimeStamp);
+
+                        ticks += gitCommit(info.Login, info.TrxId, this.GitDomainName, buildCommitMessage(vaultRepoPath, version.Key, info), info.TimeStamp, gitBranch);
+
                         if (null != Progress)
                             if (Progress(version.Key, ticks))
                                 return true;
@@ -373,21 +377,33 @@ namespace Vault2Git.Lib
 
         private int vaultGet(string repoPath, long version, long txId)
         {
+            Console.WriteLine($"From {repoPath}. Version {version}. Id {txId}");
             var ticks = Environment.TickCount;
             //apply version to the repo folder
-            GetOperations.ProcessCommandGetVersion(
-                repoPath,
-                Convert.ToInt32(version),
-                new GetOptions()
+
+            var policy = Policy
+                .Handle<Exception>()
+                .Retry(3, onRetry: (e, i) =>
+                {
+                    Console.WriteLine($"Error {e.Message}. Retrying {i} time.");
+                });
+
+            policy.Execute(() =>
+            {
+                GetOperations.ProcessCommandGetVersion(
+                    repoPath,
+                    Convert.ToInt32(version),
+                    new GetOptions
                     {
                         MakeWritable = MakeWritableType.MakeAllFilesWritable,
-                        Merge = MergeType.OverwriteWorkingCopy,
+                        Merge = MergeType.AttemptAutomaticMerge,
                         OverrideEOL = VaultEOL.None,
                         //remove working copy does not work -- bug http://support.sourcegear.com/viewtopic.php?f=5&t=11145
                         PerformDeletions = PerformDeletionsType.RemoveWorkingCopy,
-                        SetFileTime = SetFileTimeType.Current,
+                        SetFileTime = SetFileTimeType.CheckIn,
                         Recursive = true
                     });
+            });
 
             //now process deletions, moves, and renames (due to vault bug)
             var allowedRequests = new int[]
@@ -396,8 +412,8 @@ namespace Vault2Git.Lib
                                           12, //move
                                           15 //rename
                                       };
-            foreach (var item in ServerOperations.ProcessCommandTxDetail(txId).items
-                .Where(i => allowedRequests.Contains(i.RequestType)))
+
+            foreach (var item in ServerOperations.ProcessCommandTxDetail(txId).items.Where(i => allowedRequests.Contains(i.RequestType)))
 
                 //delete file
                 //check if it is within current branch
@@ -410,6 +426,7 @@ namespace Vault2Git.Lib
                     if (Directory.Exists(pathToDelete))
                         Directory.Delete(pathToDelete, true);
                 }
+
             return Environment.TickCount - ticks;
         }
 
@@ -428,6 +445,16 @@ namespace Vault2Git.Lib
             var ticks = gitLog(gitBranch, out msgs);
             //get vault version
             currentVersion = getVaultVersionFromGitLogMessage(msgs);
+            return ticks;
+        }
+
+        private int gitLastAuthor(string gitBranch, out string author)
+        {
+            string[] msgs;
+            //get info
+            var ticks = gitLog(gitBranch, out msgs);
+            //get vault version
+            author = getLastAuthorFromGitLogMessage(msgs);
             return ticks;
         }
 
@@ -457,7 +484,7 @@ namespace Vault2Git.Lib
             return unSetVaultWorkingFolder(vaultRepoPath);
         }
 
-        private int gitCommit(string vaultLogin, long vaultTrxid, string gitDomainName, string vaultCommitMessage, DateTime commitTimeStamp)
+        private int gitCommit(string vaultLogin, long vaultTrxid, string gitDomainName, string vaultCommitMessage, DateTime commitTimeStamp, string gitBranch)
         {
             string gitCurrentBranch;
             this.gitCurrentBranch(out gitCurrentBranch);
@@ -475,11 +502,39 @@ namespace Vault2Git.Lib
                 if (0 == msgs.Count())
                     return ticks;
             }
-            ticks += runGitCommand(
-                string.Format(_gitCommitCmd, vaultLogin, gitDomainName, string.Format("{0:s}", commitTimeStamp)),
-                vaultCommitMessage,
-                out msgs
+
+            string currentAuthor;
+            ticks += gitLastAuthor(gitBranch, out currentAuthor);
+
+            if (string.Equals(currentAuthor, vaultLogin, StringComparison.OrdinalIgnoreCase))
+            {
+                string[] m = null;
+                ticks += gitLogMessage(gitBranch, out m);
+
+                var stringBuilder = new StringBuilder(vaultCommitMessage);
+
+                if (m != null)
+                {
+                    foreach (var item in m)
+                    {
+                        stringBuilder.AppendLine(item);
+                    }
+                }
+
+                ticks += runGitCommand(
+                    _gitCommitAmendCmd,
+                    stringBuilder.ToString(),
+                    out msgs
                 );
+            }
+            else
+            {
+                ticks += runGitCommand(
+                    string.Format(_gitCommitCmd, vaultLogin, gitDomainName, string.Format("{0:s}", commitTimeStamp)),
+                    vaultCommitMessage,
+                    out msgs
+                );
+            }
 
             // Mapping Vault Transaction ID to Git Commit SHA-1 Hash
             if (msgs[0].StartsWith("[" + gitCurrentBranch))
@@ -529,9 +584,26 @@ namespace Vault2Git.Lib
             return version;
         }
 
+        private string getLastAuthorFromGitLogMessage(string[] msg)
+        {
+            //get last string
+            var stringToParse = msg[1];
+
+            var nameStart = stringToParse.LastIndexOf('<');
+            var nameEnd = stringToParse.LastIndexOf('@');
+
+            var name = stringToParse.Substring(nameStart, nameEnd - nameStart).Trim('@', '<', '>');
+            return name;
+        }
+
         private int gitLog(string gitBranch, out string[] msg)
         {
             return runGitCommand(string.Format(_gitLastCommitInfoCmd, gitBranch), string.Empty, out msg);
+        }
+
+        private int gitLogMessage(string gitBranch, out string[] msg)
+        {
+            return runGitCommand(string.Format(_gitLastCommitMessageCmd, gitBranch), string.Empty, out msg);
         }
 
         private int gitAddTag(string gitTagName, string gitCommitId, string gitTagComment)
@@ -617,6 +689,7 @@ namespace Vault2Git.Lib
             ServerOperations.client.LoginOptions.User = this.VaultUser;
             ServerOperations.client.LoginOptions.Password = this.VaultPassword;
             ServerOperations.client.LoginOptions.Repository = this.VaultRepository;
+            ServerOperations.client.Verbose = true;
             ServerOperations.Login();
             ServerOperations.client.MakeBackups = false;
             ServerOperations.client.AutoCommit = false;

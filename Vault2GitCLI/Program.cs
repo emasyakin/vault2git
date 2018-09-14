@@ -101,10 +101,7 @@ namespace Vault2Git.CLI
             //get configuration for branches
             var paths = ConfigurationManager.AppSettings["Convertor.Paths"];
             var pathPairs = paths.Split(';')
-                .ToDictionary(
-                pair =>
-                    pair.Split('~')[1], pair => pair.Split('~')[0]
-                    );
+                .ToDictionary(pair => pair.Split('~')[1], pair => pair.Split('~')[0]);
 
             //parse params
             var param = Params.Parse(args, pathPairs.Keys);
